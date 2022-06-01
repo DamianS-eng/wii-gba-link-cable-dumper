@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <fat.h>
+#include <wiiuse/wpad.h>
 
 //from my tests 50us seems to be the lowest
 //safe si transfer delay in between calls
@@ -215,7 +216,12 @@ int main(int argc, char *argv[])
 	h = rmode->xfbHeight - (48);
 	CON_InitEx(rmode, x, y, w, h);
 	VIDEO_ClearFrameBuffer(rmode, xfb, COLOR_BLACK);
+	//Input
 	PAD_Init();
+	WPAD_Init();
+    WPAD_SetIdleTimeout( 60 * 10 );
+    //WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
+	WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS);
 	cmdbuf = memalign(32,32);
 	resbuf = memalign(32,32);
 	u8 *testdump = memalign(32,0x400000);
@@ -252,8 +258,9 @@ int main(int argc, char *argv[])
 					break;
 			}
 			PAD_ScanPads();
+			WPAD_ScanPads();
 			VIDEO_WaitVSync();
-			if(PAD_ButtonsHeld(0))
+			if(PAD_ButtonsHeld(0) || WPAD_ButtonsHeld(0))
 				endproc();
 		}
 		if(resval & SI_GBA)
@@ -306,13 +313,16 @@ int main(int argc, char *argv[])
 			{
 				printmain();
 				printf("Press A once you have a GBA Game inserted.\n");
-				printf("Press Y to backup the GBA BIOS.\n \n");
+				printf("Press Y (or 2 on Wii Remote) to backup the GBA BIOS.\n \n");
 				PAD_ScanPads();
+				WPAD_ScanPads();
 				VIDEO_WaitVSync();
+				//Use GCN1 or Wiimote 1
 				u32 btns = PAD_ButtonsDown(0);
-				if(btns&PAD_BUTTON_START)
+				u32 wbtns = WPAD_ButtonsDown(0);
+				if((btns&PAD_BUTTON_START)||(wbtns&WPAD_BUTTON_HOME))
 					endproc();
-				else if(btns&PAD_BUTTON_A)
+				else if((btns&PAD_BUTTON_A)||(wbtns&WPAD_BUTTON_A))
 				{
 					if(recv() == 0) //ready
 					{
@@ -355,45 +365,85 @@ int main(int argc, char *argv[])
 						printf("Press B if you want to cancel dumping this game.\n");
 						if(savesize > 0)
 						{
-							printf("Press Y to backup this save file.\n");
-							printf("Press X to restore this save file.\n");
-							printf("Press Z to clear the save file on the GBA Cartridge.\n\n");
+							printf("Press Y or 1 to backup this save file.\n");
+							printf("Press X or 2 to restore this save file.\n");
+							printf("Press Z or Minus to clear the save file on the GBA Cartridge.\n\n");
 						}
 						else
 							printf("\n");
 						int command = 0;
-						while(1)
+						bool undecided = true;
+						while(undecided)
 						{
 							PAD_ScanPads();
+							WPAD_ScanPads();
 							VIDEO_WaitVSync();
 							u32 btns = PAD_ButtonsDown(0);
-							if(btns&PAD_BUTTON_START)
-								endproc();
-							else if(btns&PAD_BUTTON_A)
-							{
-								command = 1;
+							u32 wbtns = WPAD_ButtonsDown(0);
+							switch(btns)
+								{
+									case PAD_BUTTON_START:
+									endproc();
+									case PAD_BUTTON_A:
+									command = 1;
+									undecided = false;
+									break;
+									case PAD_BUTTON_B:
+									undecided = false;
+									break;
+									case PAD_BUTTON_Y:
+									if(savesize > 0) { 
+										undecided = false;
+										command = 2;
+									}
+									break;
+									case PAD_BUTTON_X:
+									if(savesize > 0) {
+										undecided = false;
+										command = 3;
+									}
+									break;
+									case PAD_TRIGGER_Z:
+									if(savesize > 0) {
+										undecided = false;
+										command = 4;
+									}
+									break;
+								}
+	//Check if Gamecube valid input given before checking Wiimote
+							if(undecided) {
 								break;
 							}
-							else if(btns&PAD_BUTTON_B)
-								break;
-							else if(savesize > 0)
-							{
-								if(btns&PAD_BUTTON_Y)
+							switch(wbtns)
 								{
-									command = 2;
+									case WPAD_BUTTON_PLUS:
+									endproc();
+									case WPAD_BUTTON_A:
+									command = 1;
+									undecided = false;
+									break;
+									case WPAD_BUTTON_B:
+									undecided = false;
+									break;
+									case WPAD_BUTTON_1:
+									if(savesize > 0) { 
+										undecided = false;
+										command = 2;
+									}
+									break;
+									case WPAD_BUTTON_2:
+									if(savesize > 0) {
+										undecided = false;
+										command = 3;
+									}
+									break;
+									case WPAD_BUTTON_MINUS:
+									if(savesize > 0) {
+										undecided = false;
+										command = 4;
+									}
 									break;
 								}
-								else if(btns&PAD_BUTTON_X)
-								{
-									command = 3;
-									break;
-								}
-								else if(btns&PAD_TRIGGER_Z)
-								{
-									command = 4;
-									break;
-								}
-							}
 						}
 						if(command == 1)
 						{
@@ -519,7 +569,7 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-				else if(btns&PAD_BUTTON_Y)
+				else if((btns&PAD_BUTTON_Y)||(wbtns&WPAD_BUTTON_2))
 				{
 					const char *biosname = "/dumps/gba_bios.bin";
 					FILE *f = fopen(biosname,"rb");

@@ -30,9 +30,11 @@ void printmain()
 {
 	printf("\x1b[2J");
 	printf("\x1b[37m");
-	printf("GBA Link Cable Dumper v1.6 by FIX94\n");
+	printf("GBA Link Cable Dumper v1.6w, original by FIX94\n");
 	printf("Save Support based on SendSave by Chishm\n");
-	printf("GBA BIOS Dumper by Dark Fader\n \n");
+	printf("GBA BIOS Dumper by Dark Fader\n");
+	printf("Solved gba variable issues by yuv422 \n");
+	printf("Wii Remote support added by DamianS-eng\n \n");
 }
 
 u8 *resbuf,*cmdbuf;
@@ -195,7 +197,7 @@ void fatalError(char *msg)
 	puts(msg);
 	VIDEO_WaitVSync();
 	VIDEO_WaitVSync();
-	sleep(5);
+	sleep(10);
 	exit(0);
 }
 int main(int argc, char *argv[]) 
@@ -320,9 +322,10 @@ int main(int argc, char *argv[])
 				//Use GCN1 or Wiimote 1
 				u32 btns = PAD_ButtonsDown(0);
 				u32 wbtns = WPAD_ButtonsDown(0);
-				if((btns&PAD_BUTTON_START)||(wbtns&WPAD_BUTTON_HOME))
+				if((btns&PAD_BUTTON_START)||(wbtns&WPAD_BUTTON_HOME)) {
 					endproc();
-				else if((btns&PAD_BUTTON_A)||(wbtns&WPAD_BUTTON_A))
+				}
+				if((btns&PAD_BUTTON_A)||(wbtns&WPAD_BUTTON_A)) 
 				{
 					if(recv() == 0) //ready
 					{
@@ -455,7 +458,7 @@ int main(int argc, char *argv[])
 								warnError("ERROR: Game already dumped!\n");
 							}
 						}
-						else if(command == 2)
+						if(command == 2)
 						{
 							FILE *f = fopen(savename,"rb");
 							if(f)
@@ -465,7 +468,7 @@ int main(int argc, char *argv[])
 								warnError("ERROR: Save already backed up!\n");
 							}
 						}
-						else if(command == 3)
+						if(command == 3)
 						{
 							size_t readsize = 0;
 							FILE *f = fopen(savename,"rb");
@@ -494,9 +497,10 @@ int main(int argc, char *argv[])
 						send(command);
 						//let gba prepare
 						sleep(1);
-						if(command == 0)
+						if(command == 0) {
 							continue;
-						else if(command == 1)
+						}
+						if(command == 1)
 						{
 							//create base file with size
 							printf("Preparing file...\n");
@@ -525,7 +529,7 @@ int main(int argc, char *argv[])
 							printf("Game dumped!\n");
 							sleep(5);
 						}
-						else if(command == 2)
+						if(command == 2)
 						{
 							//create base file with size
 							printf("Preparing file...\n");
@@ -548,7 +552,7 @@ int main(int argc, char *argv[])
 							printf("Save backed up!\n");
 							sleep(5);
 						}
-						else if(command == 3 || command == 4)
+						if(command == 3 || command == 4)
 						{
 							u32 readval = 0;
 							while(readval != savesize)
@@ -569,7 +573,7 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-				else if((btns&PAD_BUTTON_Y)||(wbtns&WPAD_BUTTON_2))
+				if((btns&PAD_BUTTON_Y)||(wbtns&WPAD_BUTTON_2))
 				{
 					const char *biosname = "/dumps/gba_bios.bin";
 					FILE *f = fopen(biosname,"rb");
@@ -578,28 +582,25 @@ int main(int argc, char *argv[])
 						fclose(f);
 						warnError("ERROR: BIOS already backed up!\n");
 					}
-					else
-					{
-						//create base file with size
-						printf("Preparing file...\n");
-						createFile(biosname,0x4000);
-						f = fopen(biosname,"wb");
-						if(!f)
-							fatalError("ERROR: Could not create file! Exit...");
-						//send over bios dump command
-						send(5);
-						//the gba might still be in a loop itself
-						sleep(1);
-						//lets go!
-						printf("Dumping...\n");
-						for(i = 0; i < 0x4000; i+=4)
-							*(vu32*)(testdump+i) = recv();
-						fwrite(testdump,0x4000,1,f);
-						printf("Closing file\n");
-						fclose(f);
-						printf("BIOS dumped!\n");
-						sleep(5);
-					}
+					//create base file with size
+					printf("Preparing file...\n");
+					createFile(biosname,0x4000);
+					f = fopen(biosname,"wb");
+					if(!f)
+						fatalError("ERROR: Could not create file! Exit...");
+					//send over bios dump command
+					send(5);
+					//the gba might still be in a loop itself
+					sleep(1);
+					//lets go!
+					printf("Dumping...\n");
+					for(i = 0; i < 0x4000; i+=4)
+						*(vu32*)(testdump+i) = recv();
+					fwrite(testdump,0x4000,1,f);
+					printf("Closing file\n");
+					fclose(f);
+					printf("BIOS dumped!\n");
+					sleep(5);
 				}
 			}
 		}

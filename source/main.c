@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
 									break;
 								}
 	//Check if Gamecube valid input given before checking Wiimote
-							if(undecided) {
+							if(!undecided) {
 								break;
 							}
 							switch(wbtns)

@@ -6,6 +6,7 @@ A GC and Wii Homebrew App to get GBA BIOS, ROMs and saves via the GC GBA Link Ca
 1. Read physical Game Boy Advance cartrige inserted into a Game Boy Advance (SP) console connected via the Gamecube Game Boy Advance Link Cable.
 1. Dump the GBA ROM to the same storage device as the loaded app.
 1. Backup save data from cartridge.
+1. Restore save data backup to catridge.
 1. Erase save data from cartridge.
 1. Dump the GBA console BIOS.
 
@@ -16,14 +17,20 @@ A GC and Wii Homebrew App to get GBA BIOS, ROMs and saves via the GC GBA Link Ca
 1. Now Boot your GBA without a cart inserted, it should automatically boot into the dumper when connected. From there you can just follow the instructions on screen.  
   - If your GBA resets when you get to the step of inserting a cart, try to boot your GBA with the cart already inserted and holding down start+select on the GBA bootup. This suspends the game launch and should allow the dumper to boot up from there.
 
-
 ## Dump Notes
 
 - The `bin`, `gba` and `sav` files dumped will be placed in a folder called "dumps" on your main device (SD Gecko on gamecube and SD/USB on Wii).
 - Please note that dumping GBA ROMs can take a long time because of the cable protocol limitations. An estimation will be displayed on screen before you dump it as a reference. File sizes vary by GBA rom.
+  - 4mb takes about 6 minutes.    
   - 16mb takes about 26 minutes.
   - 32mb takes about 48 minutes.
-  - ROM sav backups are very quick.
+  - ROM sav and BIOS backups are very quick.
+
+# Compile
+
+1. Grab the latest .zip from the master branch using `git clone`.
+1. Run the `build.bat` script.
+- If there are compiler issues, ensure the latest dependencies are installed `pacman -syuu`, and make sure you clean between compiles (`make clean`, refer to `build.bat` for specific commands).
 
 # Credits
 Latest gba header changes by yuv422.

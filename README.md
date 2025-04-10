@@ -28,7 +28,9 @@ A Nintendo Gamecube (GC) and Wii Homebrew App to get Game Boy Advance (GBA) BIOS
 
 # Compile
 
-1. Grab the latest .zip from the master branch using `git clone`.
+1. Ensure you have the latest package from [DevkitPro](https://devkitpro.org/wiki/Getting_Started).
+ - `gba-dev`, `gamecube-dev`, and `wii-dev`
+1. Grab the latest .zip from the main branch using `git clone`.
 1. Run the `build.bat` script.
 - If there are compiler issues, ensure the latest dependencies are installed `pacman -syuu`, and make sure you clean between compiles (`make clean`, refer to [build.bat]([https://github.com/DamianS-eng/wii-gba-link-cable-dumper/blob/Readme-update/build.bat](https://github.com/DamianS-eng/wii-gba-link-cable-dumper/blob/master/build.bat) for specific commands).
 

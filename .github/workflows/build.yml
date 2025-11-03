@@ -23,6 +23,7 @@ jobs:
           cd gba
           make clean
           make
+          cd ..
           mkdir -p data
           mv -f gba/gba_mb.gba data/gba_mb.gba
           

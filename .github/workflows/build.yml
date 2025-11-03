@@ -23,9 +23,6 @@ jobs:
           cd gba
           make clean
           make
-          cd ..
-          mkdir -p data
-          mv -f gba/gba_mb.gba data/gba_mb.gba
           
       - name: Upload GBA Artifact
         uses: actions/upload-artifact@v4
@@ -49,6 +46,8 @@ jobs:
             export DEVKITPRO=/opt/devkitpro
             export DEVKITPPC=${DEVKITPRO}/devkitPPC
             pwd
+            mkdir -p data
+            mv -f gba/gba_mb.gba data/gba_mb.gba
             ls # debug
             make -f Makefile.wii
   

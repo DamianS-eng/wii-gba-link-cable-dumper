@@ -46,7 +46,7 @@ jobs:
       - name: Download GBA artifact
         uses: actions/download-artifact@v4
         with:
-          name: gba-mb
+          name: gba-build
           path: data
       - name: Build wii project
         run: |

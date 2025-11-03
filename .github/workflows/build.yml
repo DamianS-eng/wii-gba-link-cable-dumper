@@ -26,7 +26,7 @@ jobs:
             export DEVKITPPC=${DEVKITPRO}/devkitPPC
           fi
           ls # debug
-          chmod +x build.bat
+          # chmod +x build.bat
           build.bat
 
       - name: Upload build artifacts

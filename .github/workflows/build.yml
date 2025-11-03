@@ -1,0 +1,40 @@
+name: Build with DevkitPro
+
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install DevkitPro
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg
+          wget https://apt.devkitpro.org/devkitpro-keyring.gpg
+          sudo apt-key add devkitpro-keyring.gpg
+          echo "deb https://apt.devkitpro.org/ stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
+          sudo apt-get update
+          sudo apt-get install -y devkitpro-pacman
+
+      - name: Install packages
+        run: |
+          sudo dkp-packamn -Sy --noconfirm gba-dev wii-dev gamecube-dev
+
+      - name: Build project
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=${DEVKITPRO}/devkitARM
+          chmod +x build.bat
+          build.bat
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+              build/*.elf
+              build/*.bin

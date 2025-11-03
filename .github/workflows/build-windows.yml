@@ -1,0 +1,36 @@
+name: Build with DevkitPro
+
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [devkitarm, devkitppc]   # devkitARM = GBA/NDS, devkitPPC = Wii/GameCube
+    container:
+      image: devkitpro/${{ matrix.target }}:latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build project
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          if [ "${{ matrix.target }}" = "devkitarm" ]; then
+            export DEVKITARM=${DEVKITPRO}/devkitARM
+          fi
+          if [ "${{ matrix.target }}" = "devkitppc" ]; then
+            export DEVKITPPC=${DEVKITPRO}/devkitPPC
+          fi
+          ls # debug
+          call build.bat
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+              build/*.elf
+              build/*.bin

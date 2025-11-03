@@ -28,8 +28,7 @@ jobs:
           mv -f gba/gba_mb.gba data/gba_mb.gba
           
       - name: Upload GBA Artifact
-        uses:
-          actions/upload-artifact#v4
+        uses: actions/upload-artifact@v4
         with:
           name: gba-build
           path: |
@@ -54,8 +53,7 @@ jobs:
             make -f Makefile.wii
   
       - name: Upload build artifacts
-        uses: 
-          actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
             name: wii-build
             path: |

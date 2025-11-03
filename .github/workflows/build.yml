@@ -16,14 +16,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build project
+      - name: Build gba project
         run: |
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=${DEVKITPRO}/devkitARM
-          export DEVKITPPC=${DEVKITPRO}/devkitPPC
+          pwd
           ls # debug
-          chmod +x build.sh
-          ./build.sh
+          cd gba
+          make clean
+          make
+          cd..
+
+      - name: Build wii project
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITPPC=${DEVKITPRO}/devkitPPC
+          pwd
+          ls # debug
+          mkdir -p data
+          mv -f gba/gba_mb.gba data/gba_mb.gba
+          make -f Makefile.wii
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

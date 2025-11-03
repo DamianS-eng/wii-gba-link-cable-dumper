@@ -6,36 +6,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [devkitarm, devkitppc]   # devkitARM = GBA/NDS, devkitPPC = Wii/GameCube
+    container:
+      image: devkitpro/${{ matrix.target }}:latest
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache DevkitPro
-        uses: actions/cache@v4
-        with:
-          path: /opt/devkitpro
-          key: ${{ runner.os }}-devkitpro-${{ hashFiles('.github/devkitpro-packages.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-devkitpro-
-
-      - name: Install DevkitPro
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget tar
-          wget https://apt.devkitpro.org/devkitpro-pacman.deb
-          sudo dpkg -i devkitpro-pacman.deb || sudo apt-get -f install -y
-
-      - name: Install packages
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          sudo dkp-pacman -Sy --noconfirm gba-dev wii-dev gamecube-dev
-          sudo dkp-pacman -Sy --noconfirm $(cat .github/devkitpro-packages.txt)
-
       - name: Build project
         run: |
           export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitARM
+          if [ "${{ matrix.target }}" = "devkitarm" ]; then
+            export DEVKITARM=${DEVKITPRO}/devkitARM
+          fi
+          if [ "${{ matrix.target }}" = "devkitppc" ]; then
+            export DEVKITPPC=${DEVKITPRO}/devkitPPC
+          fi
           chmod +x build.bat
           build.bat
 

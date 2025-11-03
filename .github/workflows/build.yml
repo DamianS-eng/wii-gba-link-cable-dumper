@@ -23,31 +23,35 @@ jobs:
           cd gba
           make clean
           make
+          mkdir -p data
+          mv -f gba/gba_mb.gba data/gba_mb.gba
           
       - name: Upload GBA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: gba-build
           path: |
-            data/gba_mb.gba
-            **/*.elf
-            **/*.bin            
+            data/gba_mb.gba     
 
   wii:
     name: Build Wii
     runs-on: ubuntu-latest
+    needs: gba
     container:
       image: devkitpro/devkitppc:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - name: Download GBA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gba-mb
+          path: data
       - name: Build wii project
         run: |
             export DEVKITPRO=/opt/devkitpro
             export DEVKITPPC=${DEVKITPRO}/devkitPPC
             pwd
-            mkdir -p data
-            mv -f gba/gba_mb.gba data/gba_mb.gba
             ls # debug
             make -f Makefile.wii
   

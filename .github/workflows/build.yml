@@ -10,19 +10,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache DevkitPro
+        uses: actions/cache@v4
+        with:
+          path: /opt/devkitpro
+          key: ${{ runner.os }}-devkitpro-${{ hashFiles('.github/devkitpro-packages.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-devkitpro-
+
       - name: Install DevkitPro
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget https://apt.devkitpro.org/devkitpro-keyring.gpg
-          sudo apt-key add devkitpro-keyring.gpg
-          echo "deb https://apt.devkitpro.org/ stable main" | sudo tee /etc/apt/sources.list.d/devkitpro.list
-          sudo apt-get update
-          sudo apt-get install -y devkitpro-pacman
+          sudo apt-get install -y wget tar
+          wget https://apt.devkitpro.org/devkitpro-pacman.deb
+          sudo dpkg -i devkitpro-pacman.deb || sudo apt-get -f install -y
 
       - name: Install packages
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          sudo dkp-packamn -Sy --noconfirm gba-dev wii-dev gamecube-dev
+          sudo dkp-pacman -Sy --noconfirm gba-dev wii-dev gamecube-dev
+          sudo dkp-pacman -Sy --noconfirm $(cat .github/devkitpro-packages.txt)
 
       - name: Build project
         run: |

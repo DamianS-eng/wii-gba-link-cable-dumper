@@ -25,6 +25,7 @@ jobs:
           if [ "${{ matrix.target }}" = "devkitppc" ]; then
             export DEVKITPPC=${DEVKITPRO}/devkitPPC
           fi
+          ls # debug
           chmod +x build.bat
           build.bat
 

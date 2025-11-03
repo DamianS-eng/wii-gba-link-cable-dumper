@@ -61,6 +61,6 @@ jobs:
         with:
             name: wii-build
             path: |
-                build/*.dol
-                build/*.elf
-                build/*.bin
+                ./*.dol
+                ./*.elf
+                ./*.bin

@@ -19,12 +19,8 @@ jobs:
       - name: Build project
         run: |
           export DEVKITPRO=/opt/devkitpro
-          if [ "${{ matrix.target }}" = "devkitarm" ]; then
-            export DEVKITARM=${DEVKITPRO}/devkitARM
-          fi
-          if [ "${{ matrix.target }}" = "devkitppc" ]; then
-            export DEVKITPPC=${DEVKITPRO}/devkitPPC
-          fi
+          export DEVKITARM=${DEVKITPRO}/devkitARM
+          export DEVKITPPC=${DEVKITPRO}/devkitPPC
           ls # debug
           chmod +x build.sh
           ./build.sh
